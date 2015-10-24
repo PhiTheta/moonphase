@@ -1,3 +1,4 @@
+/* -*- Mode: java; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
 //
 // MoonPhase.java:
 // Calculate the phase of the moon.
@@ -15,6 +16,8 @@ import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.View;
+import android.widget.TextView;
+import java.util.Date;
 
 public class MoonView extends View {
 	public static final int moonColor = Color.WHITE;
@@ -24,6 +27,9 @@ public class MoonView extends View {
 	private final MoonPhase moon = new MoonPhase();
 	private Bitmap moonImage;
 	private RectF oval = new RectF();
+
+	public StarDate mDate = null;
+	public TextView mDateText = null;
 
 	public MoonView(Context context) {
 		super(context);
@@ -51,14 +57,34 @@ public class MoonView extends View {
 		loadMoonImage(context);
 	}
 
+	public Date getDate() {
+		if (mDate != null)
+			return mDate;
+		return new StarDate();
+	}
+
+	public void setDate(int year, int month, int day) {
+		mDate = new StarDate(new Date(year-1900, month, day));
+		invalidate();
+	}
+
+	public void setDateTextWidget(TextView tv) {
+		mDateText = tv;
+	}
+
 	@Override
 	protected void onDraw(Canvas g) {
-		// Create new each time so it is update on every redraw.
-		StarDate date = new StarDate();
+		// Create a new date each time so it is update on every redraw,
+		// but only if the user hasn't set a fixed time.
+		if (mDate == null)
+			mDate = new StarDate();
+
+		if (mDateText != null)
+			mDateText.setText(mDate.toDateString());
 
 		int width = getWidth();
 		int height = getHeight();
-		double phaseAngle = moon.getPhaseAngle(date);
+		double phaseAngle = moon.getPhaseAngle(mDate);
 
 		int xcenter = width / 2;
 		int ycenter = height / 2;
